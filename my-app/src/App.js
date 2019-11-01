@@ -8,10 +8,20 @@ import './App.css';
 
 const Button =(probs)=>( <button onClick={probs.handleClick}>{probs.text}</button>)
 
+const Statistic=({text,value})=>(
+<div>
+<table>
+<tbody>
+<tr><td>{text} :</td><td>{value}</td></tr>
+</tbody>
+</table>
+</div>
+)
+
 const Statistics = (probs)=>{
       if(probs.allva !== 0){
   return(
-    <div>
+    /* <div>
       <table>
 	  <tbody>
          <tr><td>good</td><td>{probs.good}</td></tr> 
@@ -22,8 +32,17 @@ const Statistics = (probs)=>{
          <tr><td>Possitive Avg</td><td>{probs.good/probs.allva}%</td></tr>
          </tbody>
 		 </table>
-         </div>)
-      }
+         </div>) */
+		<div>
+		 <Statistic text="Good" value={probs.good} />
+		 <Statistic text="Neutral" value={probs.Neutral} />
+		 <Statistic text="Bad" value={probs.bad} />
+		 <Statistic text="All " value={probs.allva} />
+		 <Statistic text="Average" value={(probs.good-probs.bad)/probs.allva} />
+		 <Statistic text="Possitive Avg" value={probs.good/probs.allva} />
+		</div>
+      )
+	  }
       return(
       <h3>No feedback Given</h3>
       )
