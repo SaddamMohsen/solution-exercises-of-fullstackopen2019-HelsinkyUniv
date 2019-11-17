@@ -137,7 +137,7 @@ const addNumber=(event)=>setNewNumber(event.target.value)
 const onChangeSearch=(event)=>setSearchName(event.target.value)
 //function that delete input based on id
 const deleteInput=(id)=>{
-console.log('Id to be deleted is :',id)
+//console.log('Id to be deleted is :',id)
 if(!window.confirm("Are you sure you want to delete this?")) {
 return
 }
