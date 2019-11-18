@@ -1,6 +1,6 @@
 import React, { useState,useEffect } from 'react'
 import personServices from './Services/person'
-
+import Notification from './Components/Notification'
 //component to filter show based on input value
 const Filter=(props)=>{
  return(
@@ -66,6 +66,7 @@ const App = () => {
   const [newName,setNewName] = useState('')
   const [newNumber,setNewNumber]=useState('')
   const [searchName,setSearchName]=useState('')
+  const [errorMessage,setErrorMessage]=useState('')
 
 useEffect(()=>{
    personServices
@@ -103,6 +104,9 @@ const addPerson=(event)=>{
                 setPersons(persons.concat(createdObj))
                 setNewName('')
                  setNewNumber('')
+                 setErrorMessage(`${newName}  is added Successfully`)
+                         setTimeout(() => {setErrorMessage(null)}, 5000)
+                 
       })
        }
        else{
@@ -149,6 +153,7 @@ return
 
   return (
     <div>
+     <h1><Notification message={errorMessage}/></h1>
       <h2>Phonebook</h2>
       <Filter values={searchName}
               onChange={onChangeSearch}
