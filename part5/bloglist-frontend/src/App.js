@@ -19,11 +19,12 @@ const App=()=>{
   const [url,setUrl] =useState('')
     const blogFormRef = React.createRef()
   useEffect(()=>{
+    //let count=0
       blogService
         .getAll()
          .then(
            initialBlogs=>{
-             setBlogs(blogs.concat(initialBlogs))
+             setBlogs(initialBlogs)
            }
          )
     },[])
@@ -79,6 +80,7 @@ const App=()=>{
      />
     )
 
+  
 //handle adding of new Blog
 const handleBlog=async(e)=>{
   e.preventDefault()
@@ -121,8 +123,6 @@ const loginForm=()=>{
   
     return (
       <div>
-        
-       
        <Togglable buttonLable="log in">
           <LoginForm 
             handleLogin={handleLogin}
@@ -132,10 +132,7 @@ const loginForm=()=>{
             setPass={setPassword}
             />
         </Togglable>
-          
-      
       </div>
-       
     )
   }
 
@@ -149,7 +146,7 @@ const loginForm=()=>{
        <p>{user.name} is logged</p>
       <button onClick={()=>logOut()}>log Out</button>
        <h2>Add New Blog</h2>
-       <Togglable buttonLable="newBlog" ref={blogFormRef}>
+       <Togglable buttonLable="CreateBlog" ref={blogFormRef}>
         <BlogForm 
              handleBlog={handleBlog}
              title={title}
@@ -161,7 +158,7 @@ const loginForm=()=>{
              />
              </Togglable>
           <h2>Blogs</h2>
-      {rows()} 
+            {rows()} 
       </div>
       }
     
@@ -172,3 +169,4 @@ const loginForm=()=>{
 }
 
 export default App;
+                                        
