@@ -5,12 +5,13 @@ import loginService from './services/login'
 import Notificaton from './components/Notification'
 import './App.css'
 import BlogForm from './components/blogForm'
-import LoginForm from './components/LoginForm'
+//import LoginForm from './components/LoginForm'
 import Togglable from './components/Togglable'
+import {useField} from './hooks'
 
 const App=()=>{
-  const [username,setUsername]=useState('')
-  const [password,setPassword] = useState('')
+  const usernamee=useField('text')
+  const passwordd= useField('password')
   const [user,setUser] = useState(null)
   const [blogs,setBlogs]=useState([])
   const [errorMessage,setErrorMessage]=useState(null)
@@ -42,8 +43,11 @@ const App=()=>{
   const handleLogin = async (event) => {
     event.preventDefault()
     try {
+      //console.log(usernamee.value)
+      const username=usernamee.value
+      const password = passwordd.value
       const user = await loginService.login({
-        username, password,
+        username,password
       })
       //set the token into browser local storage
       window.localStorage.setItem(
@@ -51,9 +55,8 @@ const App=()=>{
       )       
       blogService.setToken(user.token)
       setUser(user)
-      setUsername('')
-      setPassword('')
-
+      usernamee.reset(true)
+      passwordd.reset(true)
     } catch (exception) {
       
       setErrorMessage('UserName or Password Wrong')
@@ -124,13 +127,19 @@ const loginForm=()=>{
     return (
       <div>
        <Togglable buttonLable="log in">
-          <LoginForm 
-            handleLogin={handleLogin}
-            username={username}
-            setUser={setUsername}
-            password={password}
-            setPass={setPassword}
-            />
+         <form onSubmit={handleLogin}>
+           username <input 
+                type={usernamee.type}
+                value={usernamee.value}
+                onChange={usernamee.onChange} />
+            <br/>
+            password <input
+               type={passwordd.type}
+               value={passwordd.value}
+               onChange={passwordd.onChange} />
+            <br/>
+            <button type="submit">login</button>
+          </form>
         </Togglable>
       </div>
     )
