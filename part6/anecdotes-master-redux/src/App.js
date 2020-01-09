@@ -1,21 +1,19 @@
 import React from 'react';
-import { addVote } from './reducers/anecdoteReducer'
+import Notification from './components/Notification'
 import AnecdoteForm from './components/AnecdoteForm'
 import AnecdoteList from './components/AnecdoteList'
+import Filter from './components/Filter'
 import './App.css'
-const App = (props) => {
-  
-
-  const store = props.store
-  
-  
+const App = () => {
   
 
   return (
     <div className="App-header">
     <h2>create new</h2>
-      <AnecdoteForm store={store}/>
-      <AnecdoteList store={store}/>
+      <Filter />
+      <Notification />
+      <AnecdoteForm />
+      <AnecdoteList />
     </div>
   )
 }

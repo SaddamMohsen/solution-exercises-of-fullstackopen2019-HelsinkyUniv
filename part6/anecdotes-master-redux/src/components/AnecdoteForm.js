@@ -1,12 +1,20 @@
 import React from 'react'
-import {createAnecodate} from '../reducers/anecdoteReducer'
-
+import {createAnecodate} from './../reducers/anecdoteReducer'
+import {addNotification,removeNotification} from './../reducers/notificationReducer'
+import { connect } from 'react-redux'
 const AnecdoteForm=(props)=>{
      const addAnecod=(e)=>{
           e.preventDefault()
           const content=e.target.anec.value
-          props.store.dispatch(createAnecodate(content))
-          e.target.anec.value=''
+          props.createAnecodate(content)
+          //set the notification message
+          props.addNotification('you added new anecdote :'+content)
+
+          //remove notification message
+        setTimeout(()=>{
+           props.removeNotification()
+                   },5000)
+             e.target.anec.value=''
      }
      
     return(
@@ -17,4 +25,11 @@ const AnecdoteForm=(props)=>{
     )
 }
 
-export default AnecdoteForm;
+const mapDispatchToProps={
+    createAnecodate,
+    addNotification,
+    removeNotification
+  
+}
+
+export default connect(null, mapDispatchToProps)(AnecdoteForm)
