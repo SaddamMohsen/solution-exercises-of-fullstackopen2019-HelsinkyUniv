@@ -2,6 +2,7 @@ const initialState = ''
 const notificationReducer=(state=initialState,action)=>{
       switch (action.type) {
     case 'ADD_NOTIFICATION':
+      console.log(action.message)
          return action.message
     case 'REMOVE_NOTIFICATION':
         return initialState
@@ -22,5 +23,16 @@ export const removeNotification=()=> {
     message:''
   };
 }
+export const setNotification=(message,timeToShow)=>{
+     return async dispatch=>{
+       
+      dispatch(addNotification(message))
+      setTimeout(()=>
+        dispatch(removeNotification())
+      ,timeToShow*1000)
+   }
+   }
+
+
 
 export default notificationReducer
