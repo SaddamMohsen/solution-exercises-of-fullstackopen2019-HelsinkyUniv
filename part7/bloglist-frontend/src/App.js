@@ -1,192 +1,201 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 
-import { Button, Form } from "react-bootstrap";
+import { Button, Tabs, Tab, Navbar, NavItem, NavLink } from "react-bootstrap";
 
-import { connect} from "react-redux";
+import { connect } from "react-redux";
+
+import {
+  BrowserRouter as Router,
+  Route,
+  Link,
+  Redirect,
+  Switch,
+  useHistory
+} from "react-router-dom";
+
+import { NavbarBrand } from "react-bootstrap";
+import NavbarCollapse from "react-bootstrap/NavbarCollapse";
 
 import "./App.css";
-import { useField } from "./hooks";
+import "./bootstrap.min.css";
 
-import Blog from "./components/Blog";
+import BlogsList from "./components/BlogsList";
 import LoginForm from "./components/LoginForm";
 import Notificaton from "./components/Notification";
 import Togglable from "./components/Togglable";
+import Users from "./components/Users";
 import BlogForm from "./components/blogForm";
-import { initializeBlogs } from "./reducers/blogsReducer";
+import { logIn, logOut } from "./reducers/loginReducer";
+import { setNotification } from "./reducers/notificationReducer";
 import blogService from "./services/blogs";
-import loginService from "./services/login";
-import {setNotification} from './reducers/notificationReducer'
-const App = props => {
-  let blg = props.blogs;
-  const usernamee = useField("text");
-  const passwordd = useField("password");
-  const [user, setUser] = useState(null);
-  /*const [bloggs, setBlogs] = useState([]);
-  const [errorMessage, setErrorMessage] = useState(null);
-  const [title, setTitle] = useState("");
-  const [author, setAuthor] = useState("");
-  const [url, setUrl] = useState("");*/
-  const blogFormRef = React.createRef();
 
-  useEffect(() => {
-    //let count=0
-    const fetchData = async () => {
-      await props.initializeBlogs();
-      //setBlogs(props.blogs[0])
-      blg = props.blogs;
-    };
-    fetchData();
-  }, []);
+const App = props => {
+  const blogFormRef = React.createRef();
 
   //Return token of usere from local storage
   useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem("loggedUser");
-    if (loggedUserJSON) {
-      const user = JSON.parse(loggedUserJSON);
-      setUser(user);
-      blogService.setToken(user.token);
+    try {
+      const loggedUserJSON = window.localStorage.getItem("loggedUser");
+      if (loggedUserJSON) {
+        const user = JSON.parse(loggedUserJSON);
+        blogService.setToken(user.token);
+      }
+    } catch (exp) {
+      console.log(exp.message);
     }
   }, []);
 
-  const handleLogin = async event => {
-    event.preventDefault();
-
-    try {
-      console.log(usernamee.value);
-      const username = usernamee.value;
-      const password = passwordd.value;
-      const user = await loginService.login({
-        username,
-        password
-      });
-      //set the token into browser local storage
-      window.localStorage.setItem("loggedUser", JSON.stringify(user));
-      blogService.setToken(user.token);
-      setUser(user);
-      usernamee.reset(true);
-      passwordd.reset(true);
-    } catch (exception) {
-      props.setNotification("UserName or Password Wrong");
-      setTimeout(() => {
-        props.setNotification(null);
-      }, 5000);
-    }
-  };
-  
-  const handleLikebtn = blogId => {
-    //let blog=handleBlogSet(blogId)
-
-    //console.log('from like',blg)
-    //console.log(typeof blogId);
-    let blog = blg.find(b => b.id === blogId);
-    console.log(blog);
-    const changedBlog = { ...blog, likes: blog.likes + 1 };
-    //console.log(changedBlog.likes)
-    //const retBlog=await blogService.addLike(blogId,changedBlog)
-    //setBlogs(blogs.map(b=>(b.id !==blogId)?b:retBlog))
-  };
-
-  const rows = () =>
-    blg.map(blog => (
-      <Blog key={blog.id} blog={blog} />
-    ));
-
-  //handle adding of new Blog
- /* const handleBlog = async e => {
-    e.preventDefault();
-    blogFormRef.current.toggleVisibility();
-    const newBlog = {
-      title: title,
-      author: author,
-      url: url
-    };
-    try {
-      const nblog = await blogService.addNewBlog(newBlog);
-      setTitle("");
-      setAuthor("");
-      setUrl("");
-      setBlogs(bloggs.concat(nblog));
-      setErrorMessage(`a new blog ${nblog.title} by ${nblog.author}`);
-      setTimeout(() => {
-        setErrorMessage(null);
-      }, 5000);
-    } catch (exception) {
-      //console.log()
-      setErrorMessage(exception.message);
-      setTimeout(() => {
-        setErrorMessage(null);
-      }, 5000);
-    }
-  };*/
   //log Out handler
   const logOut = () => {
-    const preUser = user.name;
+    console.log("from logout");
+    const preUser = props.user;
     window.localStorage.clear();
-    setUser(null);
-    props.setNotification(`${preUser} has logged Out`);
+    props.logOut();
+    props.setNotification(`${preUser.name} has logged Out`);
+    //loginForm()
     setTimeout(() => {
       props.setNotification(null);
     }, 5000);
   };
 
-  const loginForm = () => {
-    return (
-      <div>
-        <Togglable buttonLable="log in">
-          <Form onSubmit={handleLogin}>
-            <Form.Group>
-              <Form.Label>username</Form.Label>
-              <Form.Control
-                type={usernamee.type}
-                value={usernamee.value}
-                onChange={usernamee.onChange}
-              />
-              <br />
-              <Form.Label>password</Form.Label>
-              <Form.Control
-                type={passwordd.type}
-                value={passwordd.value}
-                onChange={passwordd.onChange}
-              />
-              <br />
-              <Button type="submit">login</Button>
-            </Form.Group>
-          </Form>
-        </Togglable>
-      </div>
-    );
-  };
-
   return (
-    <div id="root" className="container">
-      <Notificaton message={props.message} />
-      <h1>Blog List FrontEnd</h1>
-      {user === null ? (
-        loginForm()
-      ) : (
-        <div>
-          <p>{user.name} is logged</p>
-          <Button onClick={() => logOut()}>log Out</Button>
-          <h2>Add New Blog</h2>
-          <Togglable buttonLable="CreateBlog" ref={blogFormRef}>
-            <BlogForm />
-          </Togglable>
-          <h2>Blogs</h2>
-          {rows()}
-        </div>
-      )}
+    <Router>
+      <div className="container">
+        <Notificaton message={props.message} />
+        <Navbar
+          className="navbar navbar-expand navbar-dark"
+          bg="dark"
+          expand="lg"
+        >
+          <Navbar.Brand text="Blog List Application">
+            Blog List Application
+          </Navbar.Brand>
+          <Navbar.Collapse class="collapse navbar-collapse">
+            <NavItem className="nav-item">
+              <a className="nav-link">
+                <Link to="/">Home Page</Link>
+              </a>
+            </NavItem>
+            <NavItem className="nav-item">
+              <a className="nav-link">
+                <Link to="/blogs">Blogs</Link>
+              </a>
+            </NavItem>
+            <NavItem className="nav-item">
+              <a className="nav-link">
+                <Link to="/users">Users</Link>
+              </a>
+            </NavItem>
+
+            <ul className="nav navbar-nav navbar-right">
+              <NavItem className="nav-item">
+                <a className="nav-link">
+                  <Navbar.Text>
+                    <span className="glyphicon glyphicon-log-in"></span>{" "}
+                    <AuthButton user={props.user} logout={logOut} />
+                  </Navbar.Text>
+                </a>
+              </NavItem>
+            </ul>
+          </Navbar.Collapse>
+        </Navbar>
+
+        <Switch>
+          <Route
+            exact
+            path="/"
+            render={() => (
+              <div>
+                <h1>Blog List Application</h1>
+              </div>
+            )}
+          ></Route>
+          <Route exact path="/login">
+            <LoginForm />
+          </Route>
+          <PrivateRoute user={props.user} path="/blogs">
+            <Togglable buttonLable="Create Blog" ref={blogFormRef}>
+              <BlogForm />
+            </Togglable>
+            <BlogsList />
+          </PrivateRoute>
+          <Route path="/blogs"></Route>
+          <PrivateRoute user={props.user} path="/">
+            <Users />
+          </PrivateRoute>
+        </Switch>
+      </div>
+    </Router>
+  );
+};
+
+const User = () => {
+  /* let history = useHistory();
+  let location = useLocation();
+
+  let { from } = location.state || { from: { pathname: "/" } };
+  const handleClick = () => {
+    console.log("hello from user");
+    history.replace(from);
+  };*/
+  return (
+    <div>
+      <Button>Back to home</Button>
+      <p>users</p>
+    </div>
+  );
+};
+const AuthButton = ({ user, logout }) => {
+  let history = useHistory();
+
+  return user !== null ? (
+    <p>
+      Welcome!{user.name}
+      <Button
+        onClick={() => {
+          logout();
+          history.push("/");
+        }}
+      >
+        Sign out
+      </Button>
+    </p>
+  ) : (
+    <div>
+      <p>You are not logged in.</p>
     </div>
   );
 };
 
+const PrivateRoute = ({ user, children, ...rest }) => {
+  return (
+    <Route
+      {...rest}
+      render={({ location }) =>
+        user !== null ? (
+          children
+        ) : (
+          <Redirect
+            to={{
+              pathname: "/login",
+              state: { from: location }
+            }}
+          />
+        )
+      }
+    />
+  );
+};
 const mapStateToProps = state => {
   return {
-    blogs: state.blogs,
-    message:state.notification
+    message: state.notification,
+    user: state.user
   };
 };
 const mapDispatchToProps = {
-  initializeBlogs,setNotification
+  setNotification,
+  logIn,
+  logOut
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
