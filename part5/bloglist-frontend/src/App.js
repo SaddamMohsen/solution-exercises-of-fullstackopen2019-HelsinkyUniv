@@ -55,8 +55,8 @@ const App=()=>{
       )       
       blogService.setToken(user.token)
       setUser(user)
-      usernamee.reset(true)
-      passwordd.reset(true)
+      usernamee.reset()
+      passwordd.reset()
     } catch (exception) {
       
       setErrorMessage('UserName or Password Wrong')

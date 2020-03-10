@@ -14,8 +14,12 @@ const blogsReducer = (state = [], action) => {
     case "ADD_BLOG":
       return state.concat(action.data.nblog);
     case "ADD_LIKE":
-      console.log("states from add like", state);
-      console.log(action.data.likedBlog);
+      //console.log("states from add like", state);
+      //console.log(action.data.likedBlog);
+      return state.items.map(anecs =>
+        anecs.id !== action.data.likedBlog.id ? anecs : action.data.likedBlog
+      );
+    case "ADD_COMMENT":
       return state.items.map(anecs =>
         anecs.id !== action.data.likedBlog.id ? anecs : action.data.likedBlog
       );
@@ -64,6 +68,16 @@ export const addLike = blog => {
     const likedBlog = await blogService.addLike(blog.id, blog);
     dispatch({
       type: "ADD_LIKE",
+      data: { likedBlog }
+    });
+  };
+};
+export const addComment =(id,comment) => {
+  console.log("from comment Dispatch", comment);
+  return async dispatch => {
+    const likedBlog = await blogService.addLike(id, {comments:comment});
+    dispatch({
+      type: "ADD_COMMENT",
       data: { likedBlog }
     });
   };

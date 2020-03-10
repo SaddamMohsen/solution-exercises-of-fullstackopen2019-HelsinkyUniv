@@ -8,17 +8,13 @@ import { useState } from 'react'
           setValue(event.target.value)
   }
  
-  const reset=(e)=>{
-    if(e===true)
+  const reset=()=>{
        setValue('')
   }
 
 
-  return {
+  return [{
     type,
     value,
-    onChange,
-    reset
-  }
-  
+    onChange,},reset]
 }

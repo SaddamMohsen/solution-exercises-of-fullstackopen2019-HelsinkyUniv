@@ -1,5 +1,5 @@
 import loginService from "../services/login";
-import userService from "../services/users"
+
 import { userConstants } from "./userConstant";
 
 let user = JSON.parse(localStorage.getItem("loggedUser"));
@@ -10,7 +10,7 @@ const loginReducer = (state = initialState, action) => {
   switch (action.type) {
     
     case userConstants.LOGIN_REQUEST:
-      console.log("from login success", action.loggedUser);
+      //console.log("from login success", action.loggedUser);
       if (action.data.loggedUser)
         window.localStorage.setItem(
           "loggedUser",

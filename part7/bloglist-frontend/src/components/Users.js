@@ -1,24 +1,18 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 import { connect } from "react-redux";
 
-import {
-  BrowserRouter as Router,
-  Route,
-  Link,
-  useHistory
-} from "react-router-dom";
+import { Route, Link, useHistory } from "react-router-dom";
 
 import { Accordion, Card } from "react-bootstrap";
 import { Badge, ListGroup, ListGroupItem } from "react-bootstrap";
-import { useAccordionToggle } from "react-bootstrap";
 
 import { getAll } from "../reducers/usersReducer";
 //import Blog from "./Blog";
 const Users = props => {
-  //if (!props.users.items) return null;
   const user = props.user;
   const users = props.users;
+  const [activeKey, setActiveKey] = useState("0");
   useEffect(() => {
     if (props.user !== null) {
       const fetchData = async () => {
@@ -27,40 +21,49 @@ const Users = props => {
 
       fetchData();
     }
-    //console.log("from effect");
-    //props.initializeBlogs();
   }, []);
 
   const userById = id => {
     const a = users.items.find(a => a.id === id);
     return a;
   };
+
+  const setActiveKeyOnSelect = actKey => {
+    if (actKey === activeKey) actKey = -1;
+    setActiveKey(actKey);
+  };
   return (
-    <div className="col-md-6 col-md-offset-3">
+    <div className="col-bg-6 col-md-offset-3">
       <h1>Hi {user.name}!</h1>
       <p>You're logged in with React!!</p>
       <h3>All registered users:</h3>
-      {users.loading && <em>Loading users...</em>}
+      {users.loading && (
+        <div
+          className="spinner-border"
+          style={{ width: "3rem", height: "3rem" }}
+          role="status"
+        >
+          <span className="sr-only">Loading Users...</span>
+        </div>
+      )}
       {users.error && <span className="text-danger">ERROR: {users.error}</span>}
       {users.items && (
         <div>
-          {users.items.map((u, index) => (
-            <Accordion defaultActiveKey="1">
-              <Card key={u.id}>
-                /*
-                <Accordion.Toggle as={Card.Header} eventKey="0">
+          <Accordion activeKey={activeKey}>
+            {users.items.map((u, index) => (
+              <Card
+                key={u.id}
+                eventKey={index}
+                onClick={() => {
+                  setActiveKeyOnSelect(index);
+                }}
+              >
+                <Accordion.Toggle as={Card.Header}>
                   <Link to={`/users/${u.id}`}>{u.name} </Link> ---------- Blogs:{" "}
                   <Badge varian="light">{u.blogs.length}</Badge>
                 </Accordion.Toggle>
-                */
-                <CustomToggle eventKey="0">
-                  <Link to={`/users/${u.id}`}>
-                    {u.name}
-                    <Badge varian="light">{u.blogs.length}</Badge>
-                  </Link>{" "}
-                  ---------- Blogs:{" "}
-                </CustomToggle>
-                <Accordion.Collapse eventKey="0">
+
+                <Accordion.Collapse eventKey={index}>
                   <Card.Body>
                     <Route
                       exact
@@ -72,8 +75,8 @@ const Users = props => {
                   </Card.Body>
                 </Accordion.Collapse>
               </Card>
-            </Accordion>
-          ))}
+            ))}
+          </Accordion>
         </div>
       )}
 
@@ -81,12 +84,6 @@ const Users = props => {
     </div>
   );
 };
-function CustomToggle({ children, eventKey }) {
-  const decoratedOnClick = useAccordionToggle(eventKey, () =>
-    console.log("totally custom!")
-  );
-  return { children };
-}
 const User = props => {
   const history = useHistory();
   //props.history.push("/users");
@@ -99,8 +96,8 @@ const User = props => {
   };
   return (
     <Card>
-      <Card.Header>{user.username} </Card.Header>
-      <Card.Subtitle className="mb-2 text-muted">
+      <Card.Header> {user.username} </Card.Header>
+      <Card.Subtitle className="mb-4 text-muted">
         <strong>Blogs of {user.username}</strong>
       </Card.Subtitle>
       <ListGroup className="list-group-flush">

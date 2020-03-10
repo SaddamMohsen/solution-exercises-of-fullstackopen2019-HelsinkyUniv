@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 
-import { Button, Tabs, Tab, Navbar, NavItem, NavLink } from "react-bootstrap";
+import { Button, Navbar, Nav } from "react-bootstrap";
 
 import { connect } from "react-redux";
 
@@ -12,9 +12,6 @@ import {
   Switch,
   useHistory
 } from "react-router-dom";
-
-import { NavbarBrand } from "react-bootstrap";
-import NavbarCollapse from "react-bootstrap/NavbarCollapse";
 
 import "./App.css";
 import "./bootstrap.min.css";
@@ -60,9 +57,41 @@ const App = props => {
 
   return (
     <Router>
-      <div className="container">
+      <div
+        className="container"
+        style={{ height: "100%", margin: "0px 0px 0px 10px auto" }}
+      >
         <Notificaton message={props.message} />
         <Navbar
+          collapseOnSelect
+          expand="lg"
+          bg="light"
+          variant="light"
+          expand="lg"
+        >
+          <Navbar.Brand href="/">Blog List Application</Navbar.Brand>
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="mr-auto">
+              <Link to="/" style={{ padding: 30 }}>
+                Home Page
+              </Link>
+              <Link to="/blogs" style={{ padding: 30 }}>
+                Blogs
+              </Link>
+              <Link to="/users" style={{ padding: 30 }}>
+                Users
+              </Link>
+            </Nav>
+          </Navbar.Collapse>
+          <Navbar.Toggle />
+          <Navbar.Collapse className="justify-content-end">
+            <Navbar.Text>
+              Signed in as: <AuthButton user={props.user} logout={logOut} />
+            </Navbar.Text>
+          </Navbar.Collapse>
+        </Navbar>
+        {/* <Navbar
           className="navbar navbar-expand navbar-dark"
           bg="dark"
           expand="lg"
@@ -70,35 +99,27 @@ const App = props => {
           <Navbar.Brand text="Blog List Application">
             Blog List Application
           </Navbar.Brand>
-          <Navbar.Collapse class="collapse navbar-collapse">
+          <Navbar.Collapse className="collapse navbar-collapse">
             <NavItem className="nav-item">
-              <a className="nav-link">
-                <Link to="/">Home Page</Link>
-              </a>
+              <NavLink to="/">Home Page</NavLink>
             </NavItem>
             <NavItem className="nav-item">
-              <a className="nav-link">
-                <Link to="/blogs">Blogs</Link>
-              </a>
+              <Link to="/blogs">Blogs</Link>
             </NavItem>
             <NavItem className="nav-item">
-              <a className="nav-link">
-                <Link to="/users">Users</Link>
-              </a>
+              <Link to="/users">Users</Link>
             </NavItem>
 
             <ul className="nav navbar-nav navbar-right">
-              <NavItem className="nav-item">
-                <a className="nav-link">
-                  <Navbar.Text>
-                    <span className="glyphicon glyphicon-log-in"></span>{" "}
-                    <AuthButton user={props.user} logout={logOut} />
-                  </Navbar.Text>
-                </a>
+              <NavItem className="nav-item  justify-content-end">
+                <Navbar.Text>
+                  <span className="glyphicon glyphicon-log-in"></span>{" "}
+                  <AuthButton user={props.user} logout={logOut} />
+                </Navbar.Text>
               </NavItem>
             </ul>
           </Navbar.Collapse>
-        </Navbar>
+        </Navbar>*/}
 
         <Switch>
           <Route
@@ -125,6 +146,9 @@ const App = props => {
           </PrivateRoute>
         </Switch>
       </div>
+      {
+        // <Footer />
+      }
     </Router>
   );
 };
@@ -149,8 +173,8 @@ const AuthButton = ({ user, logout }) => {
   let history = useHistory();
 
   return user !== null ? (
-    <p>
-      Welcome!{user.name}
+    <span>
+      !{user.name}
       <Button
         onClick={() => {
           logout();
@@ -159,7 +183,7 @@ const AuthButton = ({ user, logout }) => {
       >
         Sign out
       </Button>
-    </p>
+    </span>
   ) : (
     <div>
       <p>You are not logged in.</p>
@@ -184,6 +208,35 @@ const PrivateRoute = ({ user, children, ...rest }) => {
         )
       }
     />
+  );
+};
+const Footer = () => {
+  const style = {
+    position: "fixed",
+    left: "0",
+    bottom: "0",
+    width: "100%",
+    //"justify-content": "bottom",
+    height: "10%",
+    display: "inline",
+    //position: "relative",
+    "background-color": "transparent",
+    "text-align": "center",
+    color: "black",
+    "border-left": "50px solid transparent",
+    "border-right": "50px solid transparent",
+    "border-bottom": "50px solid beige"
+  };
+  return (
+    <div style={style}>
+      <p>
+        <strong>Blog List Application</strong>
+        <br />
+        <em> Created By Developer Saddam Mohsen(c) 2020</em>
+        <br />
+        <a href="https://github.com/SaddamMohsen">Saddam Mohsen on GithuB</a>
+      </p>
+    </div>
   );
 };
 const mapStateToProps = state => {
