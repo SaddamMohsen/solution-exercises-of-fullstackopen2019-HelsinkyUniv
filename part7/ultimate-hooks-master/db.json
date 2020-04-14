@@ -1,0 +1,36 @@
+{
+  "notes": [
+    {
+      "content": "custom-hookit aivan mahtavia",
+      "id": 1
+    },
+    {
+      "content": "paras feature ikinä <3",
+      "id": 2
+    },
+    {
+      "content": "my first post from custom hook",
+      "id": 3
+    },
+    {
+      "content": "hiiiiiiiiiiiii",
+      "id": 6
+    },
+    {
+      "content": "helllo",
+      "id": 7
+    }
+  ],
+  "persons": [
+    {
+      "name": "mluukkai",
+      "number": "040-5483923",
+      "id": 1
+    },
+    {
+      "name": "saddam",
+      "number": "777207896",
+      "id": 3
+    }
+  ]
+}
