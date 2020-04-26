@@ -92,7 +92,7 @@ const typeDefs = gql`
   }
   type Book {
     title: String!
-    published: Int!
+    published: String!
     author: String!
     genres: [String]
     id: ID!
@@ -109,11 +109,11 @@ const typeDefs = gql`
      addAuthor(name: String!, born: Int): Author!,
     addBook(
       title: String!
-      published: Int!
+      published: String!
       author: String!
       genres: [String]
     ): Book!
-    editAuthor(name:String!,setBornTo:Int!):Author!
+    editAuthor(name:String!,setBornTo:String!):Author!
    
   }
 `;
@@ -161,7 +161,7 @@ const resolvers = {
 
   Mutation: {
     addAuthor: (root, args) => {
-      if (authors.find((p) => p.name === args.author)) {
+      if (authors.find((p) => p.name === args.name)) {
         throw new UserInputError("Name must be unique", {
           invalidArgs: args.name,
         });
@@ -172,14 +172,30 @@ const resolvers = {
       return author;
     },
     addBook: (root, args) => {
-      let book;
+		let book;
+		 if (authors.find((p) => p.name === args.author)) {
+			 console.log('autthor here')
+      
      
         book = { ...args, id: uuid() };
         books = books.concat(book);
       
-      return book;
-    },
+      
+    }
+	else{
+		
+		console.log('create autthor here')
+		let author = { name:args.author, id: uuid() };
+      authors = authors.concat(author);
+	  
+     
+        book = { ...args, id: uuid() };
+        books = books.concat(book);
+      
+	}
+	return book},
   editAuthor:(root,args)=>{
+	  console.log('edit Author')
     let author=authors.find(p=>p.name===args.name)
     author = {...author,born:args.setBornTo}
     authors=authors.map(p=>p.name === author.name?author:p)
