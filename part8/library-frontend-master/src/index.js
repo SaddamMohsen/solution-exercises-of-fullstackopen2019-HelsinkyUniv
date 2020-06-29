@@ -1,6 +1,3 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import App from "./App";
 import {
   ApolloProvider,
   ApolloClient,
@@ -9,10 +6,16 @@ import {
   gql,
 } from "@apollo/client";
 
+import React from "react";
+
+import ReactDOM from "react-dom";
+
+import App from "./App";
+
 const client = new ApolloClient({
   cache: new InMemoryCache(),
   link: new HttpLink({
-    uri: "http://192.168.1.109:4000",
+    uri: "http://localhost:4000",
   }),
 });
 /*const query = gql`

@@ -15,7 +15,7 @@ export const All_Authors=gql`
      allBooks {
          title
          published
-         author
+         author {name}
          genres
      }
  }`
@@ -30,7 +30,7 @@ mutation createBook($title: String!, $published: String!, $author: String!, $gen
   ) {
     title
     published
-    author
+     
     genres
   }
 }
@@ -44,4 +44,16 @@ mutation editAuthor($name:String!,$born:String!){
     name
     born  
   }
+}`
+
+export const EDIT_BOOK=gql`
+mutation editBook($title:String!,$author:String!){
+	editBook(
+	title:$title,
+	setAuthorTo:$author){
+		title
+		published
+    
+    genres
+	}
 }`

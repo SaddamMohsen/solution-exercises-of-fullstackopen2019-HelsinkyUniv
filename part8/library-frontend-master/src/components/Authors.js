@@ -1,5 +1,7 @@
+import { useQuery, useMutation } from "@apollo/client";
+
 import React, { useState } from "react";
-import { gql, useQuery, useMutation } from "@apollo/client";
+
 import { All_Authors, EDIT_AUTHOR } from "../queries";
 
 const Authors = (props) => {
@@ -35,8 +37,8 @@ const Authors = (props) => {
         <tbody>
           <tr>
             <th></th>
-            <th>born</th>
-            <th>books</th>
+            <th>{'   '}born</th>
+            <th>{'        '}books</th>
           </tr>
           {authors.map((a) => (
             <tr key={a.name}>
@@ -49,7 +51,7 @@ const Authors = (props) => {
           ))}
         </tbody>
       </table>
-      <h2>change number</h2>
+      <h2>Change Born Date</h2>
 
       <form onSubmit={submit}>
         <div>
