@@ -37,7 +37,7 @@ const typeDefs = gql`
   }
   type User {
     username: String!
-    favoriteGenre: String!
+    favoriteGenres: [String]
     id: ID!
   }
 
@@ -49,6 +49,7 @@ const typeDefs = gql`
     bookCount: Int!
     authorCount: Int!
     allBooks(author: String, gener: String): [Book!]!
+	findBooks(gener: String!): [Book!]!
     allAuthors: [Author!]!
     bookByAuthor(name: String!): [Book!]
     me: User
@@ -63,6 +64,7 @@ const typeDefs = gql`
     ): Book!
     editAuthor(name: String!, setBornTo: String!): Author!
     editBook(title: String!, setAuthorTo: String!): Book!
+	editBookGenres(title:String!,setGenresTo:String!):Book!
     createUser(username: String!, favoriteGenre: String!): User
     login(username: String!, password: String!): Token
   }
@@ -76,8 +78,14 @@ const resolvers = {
       return Author.collection.countDocuments();
     },
     allBooks: async (root, args) => {
-      return await Book.find({}).populate("authors");
+		
+	  return await Book.find({}).populate("authors");
+  
     },
+	findBooks:async (root, args) => {
+		
+			return await Book.find({genres:args.gener}).populate("authors");
+	},
     allAuthors: () => {
       return Author.find({});
     },
@@ -87,6 +95,7 @@ const resolvers = {
       return await Book.find({ author: author._id });
     },
     me: (root, args, context) => {
+		//console.log(context.currentUser)
       return context.currentUser;
     },
   } /*end of Query*/,
@@ -237,8 +246,30 @@ const resolvers = {
       });
       return Book.findOne({ title: args.title });
     },
+   editBookGenres:async(root,args)=>{
+	     console.log("in EditBook Genres",args)
+	   var book;
+	   try {
+          book = await Book.findOne({ title: args.title });
+		   Book.findOneAndUpdate(
+            { _id: book._id },
+            { $set: { genres: args.setGenresTo}, new: true },
+            (err) => {
+              if (err) console.log("error in update the genres of the book ");
+            }
+          );
+        } catch (error) {
+          throw new UserInputError(error.message, {
+            invalidArgs: args,
+          });
+        }
+        console.log("Update Book", book);
+        //return book;
+      
+      return Book.findOne({ title: args.title });
+   },
     createUser: (root, args) => {
-      const user = new User({ username: args.username });
+      const user = new User({ username: args.username,favoriteGenre:args.genres });
 
       return user.save().catch((error) => {
         throw new UserInputError(error.message, {

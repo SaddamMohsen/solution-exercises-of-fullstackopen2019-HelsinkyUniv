@@ -1,2 +1,2 @@
-Solution of part8b from exercise 8.8 to 8.12
-react graphql library front end
+Solution of part8d from exercise 8.17 to 8.22
+react graphql library front end with login and Cache 
