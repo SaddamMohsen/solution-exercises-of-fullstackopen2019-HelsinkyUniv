@@ -4,6 +4,13 @@ const jwt = require("jsonwebtoken");
 const Book = require("./models/books");
 const Author = require("./models/authors");
 const User = require("./models/users");
+//const loaders =require("./loaders.js");
+const DataLoader = require("dataloader")
+//const authLoader =require("./loaders.js");
+var _ = require('lodash');
+
+const { PubSub } = require('apollo-server')
+const pubsub = new PubSub()
 
 const JWT_SECRET = "NEED_HERE_A_SECRET_KEY";
 mongoose.set("useFindAndModify", false);
@@ -20,6 +27,34 @@ mongoose
   .catch((error) => {
     console.log("error connection to MongoDB:", error.message);
   });
+  
+  //loader of author ids to solve the proplem of n+1
+	  const loader ={
+        authors: new DataLoader(async ids=>{
+		    const rows = await Author.find({ _id: { $in: ids } })
+			//console.log('in loader',rows)
+			const lookup = rows.reduce((accu,row)=>{
+				accu[row._id]=row
+			    return accu
+			},{})
+			return ids.map(id=>lookup[id]||null)
+	  })
+	  }
+  
+ /*const getAuthLoader =(authIds) => {
+	//console.log('author in loader')
+    return Author.find({ _id: { $in: authIds } }).then(authors => {
+		//console.log('author in loader',authors)
+		
+        const authById = _.keyBy(authors, "_id");
+		//console.log('authByid',authById)
+        return authIds.map(authId => authById[authId]);
+    });
+};
+
+ const authLoader = new DataLoader(getAuthLoader)*/
+ 
+  
 
 const typeDefs = gql`
   type Author {
@@ -37,7 +72,7 @@ const typeDefs = gql`
   }
   type User {
     username: String!
-    favoriteGenre: String!
+    favoriteGenres: [String]
     id: ID!
   }
 
@@ -49,6 +84,7 @@ const typeDefs = gql`
     bookCount: Int!
     authorCount: Int!
     allBooks(author: String, gener: String): [Book!]!
+	findBooks(gener: String!): [Book!]!
     allAuthors: [Author!]!
     bookByAuthor(name: String!): [Book!]
     me: User
@@ -63,8 +99,12 @@ const typeDefs = gql`
     ): Book!
     editAuthor(name: String!, setBornTo: String!): Author!
     editBook(title: String!, setAuthorTo: String!): Book!
+	editBookGenres(title:String!,setGenresTo:String!):Book!
     createUser(username: String!, favoriteGenre: String!): User
     login(username: String!, password: String!): Token
+  }
+  type Subscription{
+    bookAdded:Book!
   }
 `;
 
@@ -76,8 +116,14 @@ const resolvers = {
       return Author.collection.countDocuments();
     },
     allBooks: async (root, args) => {
-      return await Book.find({}).populate("authors");
+		
+	  return await Book.find({}).populate("authors");
+  
     },
+	findBooks:async (root, args) => {
+		
+			return await Book.find({genres:args.gener}).populate("authors");
+	},
     allAuthors: () => {
       return Author.find({});
     },
@@ -87,6 +133,7 @@ const resolvers = {
       return await Book.find({ author: author._id });
     },
     me: (root, args, context) => {
+		//console.log(context.currentUser)
       return context.currentUser;
     },
   } /*end of Query*/,
@@ -171,6 +218,9 @@ const resolvers = {
           });
         }
       });
+	    
+		
+	pubsub.publish('Book_ADDED', { bookAdded: book })
       return book;
     },
     editAuthor: async (root, args,{currentUser}) => {
@@ -204,7 +254,10 @@ const resolvers = {
             { _id: doc._id },
             { $push: { books: book._id } },
             async (err) => {
-              if (err) console.log("Error in add book to author", book.title);
+              if (err) {
+				  console.log("Error in add book to author", book.title);
+			   return err;
+			  }
               //remove the book id from the last author
               Author.findByIdAndUpdate(
                 { _id: book.author },
@@ -237,8 +290,30 @@ const resolvers = {
       });
       return Book.findOne({ title: args.title });
     },
+   editBookGenres:async(root,args)=>{
+	     console.log("in EditBook Genres",args)
+	   var book;
+	   try {
+          book = await Book.findOne({ title: args.title });
+		   Book.findOneAndUpdate(
+            { _id: book._id },
+            { $set: { genres: args.setGenresTo}, new: true },
+            (err) => {
+              if (err) console.log("error in update the genres of the book ");
+            }
+          );
+        } catch (error) {
+          throw new UserInputError(error.message, {
+            invalidArgs: args,
+          });
+        }
+        console.log("Update Book", book);
+        //return book;
+      
+      return Book.findOne({ title: args.title });
+   },
     createUser: (root, args) => {
-      const user = new User({ username: args.username });
+      const user = new User({ username: args.username,favoriteGenre:args.genres });
 
       return user.save().catch((error) => {
         throw new UserInputError(error.message, {
@@ -265,23 +340,40 @@ const resolvers = {
     name: (root) => root.name,
     born: (root) => root.born,
     id: (root) => root.id,
-    bookCount: async (root) => {
+    bookCount:async(root) => {
       const auth = await Author.findOne({ _id: root._id });
       //console.log("from book Count", auth.books.length);
+	  //const auth=authLoader.load(root._id)
       return auth.books.length;
-    },
+    
+  }
   },
   Book: {
     title: (root) => root.title,
     published: (root) => root.published,
     genres: (root) => root.genres,
-    author: async (root) => {
+   /* author: async (root) => {
       const auth = await Author.findOne({ _id: root.author });
       //console.log(auth);
+	 // console.log('authors',Author.findOne({ _id: root.author }))
+
       return {
         name: auth.name,
         id: auth._id,
+		
       };
+    
+      
+    },*/
+	 author:(root) => {
+		 //const auth = await authLoader.load(root.author)
+	//console.log('in auth',auth)
+	// return  authLoader.load(root.author)},
+  return loader.authors.load(root.author)}
+  },
+  Subscription: {
+    bookAdded: {
+      subscribe: () => pubsub.asyncIterator(['Book_ADDED'])
     },
   },
 }; /*end of resolver*/
@@ -294,11 +386,21 @@ const server = new ApolloServer({
     if (auth && auth.toLowerCase().startsWith("bearer ")) {
       const decodedToken = jwt.verify(auth.substring(7), JWT_SECRET);
       const currentUser = await User.findById(decodedToken.id);
-      return { currentUser };
+      return { currentUser,
+	  loader,
+	 
+ };
     }
   },
 });
+/*server.use('/graphql', function(req, res) {
+    return graphqlExpress({
+        schema,
+        context: { loaders }
+    })(req, res);
+});*/
 
-server.listen().then(({ url }) => {
-  console.log(`Server ready at ${url}`);
-});
+server.listen().then(({ url, subscriptionsUrl }) => {
+  console.log(`Server ready at ${url}`)
+  console.log(`Subscriptions ready at ${subscriptionsUrl}`)
+})

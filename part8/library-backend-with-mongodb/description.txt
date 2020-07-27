@@ -1,2 +1,3 @@
-Solution of Part8c from exercise 8.13 to exercise 8.16
+Solution of Part8 from exercise 8.23 to exercise 8.26
 library backend with mongo 
+with solve of n+1 problem with dataloader
